@@ -10,6 +10,11 @@ running = True
 
 pygame.display.set_caption("bounce_game")
 
+def dellete_ball(b):
+    global num_of_ball
+    num_of_ball -= 1
+    ball.remove(b)
+
 class Ball():
     def __init__(self):
         self.x = 400
@@ -18,7 +23,7 @@ class Ball():
         self.radius = 10
         self.color = (255, 255, 255)
         
-        self.diriction = [random.randrange(-1,2,2), 1] # [x, y]
+        self.diriction = [random.randrange(-10,20,1)/10, 1] # [x, y]
         self.speed = 5 
 
     def draw(self, screen):
@@ -26,8 +31,8 @@ class Ball():
 
     # move the ball ,rebounce on wall, change diriction
     def move(self,brick,board):
-        rad = random.random()*10%2-1
-        print(rad)
+        global num_of_ball
+        rad = random.choice(range(-1,2,2))/10
 
         speed = self.speed
         self.x += self.diriction[0]*speed
@@ -37,13 +42,16 @@ class Ball():
             self.diriction[0] *= -1
             self.diriction[1] += rad
         if self.y + self.radius >= screen.get_height():
-            fail()
+            if num_of_ball == 1:
+                fail()
+            else:
+                dellete_ball(self)
         if self.y  <= 0:
             self.diriction[1] *= -1
             self.diriction[1] += rad
 
         if self.x + self.radius >= board.get_x_y_length()[0] and self.x - self.radius <= board.get_x_y_length()[0] + board.get_x_y_length()[2]:
-            if self.y + self.radius >= board.get_x_y_length()[1] and self.y - self.radius <= board.get_x_y_length()[1] + 10:
+            if self.y + self.radius >= board.get_x_y_length()[1] and self.y - self.radius <= board.get_x_y_length()[1]:
                 self.diriction[1] *= -1
                 self.diriction[1] += rad
 
@@ -77,16 +85,30 @@ class Board():
         return self.x, self.y, self.length
 
     def input(self, event):
+        print(event)
         if event.type == pygame.KEYDOWN:
+
             if event.key == pygame.K_LEFT:
                 self.x -= 10
             if event.key == pygame.K_RIGHT:
                 self.x += 10
 
-            if self.x+self.length >= 800:
-                self.x = 800 - self.length
-            if self.x <= 0:
-                self.x = 0
+        if event.type == pygame.TEXTINPUT:
+            if event.text == 'a':
+                self.x -= 10
+            if event.text == 'd':
+                self.x += 10
+
+            if event.text == ' ':
+                print('a')
+                global ball,num_of_ball
+                num_of_ball += 1
+                ball.append(Ball())
+
+        if self.x+self.length >= 800:
+            self.x = 800 - self.length
+        if self.x <= 0:
+            self.x = 0
 
     def draw(self, screen):
         pygame.draw.rect(screen, self.color, (self.x, self.y, self.length, 10))
@@ -119,12 +141,20 @@ def fail():
     global is_fail
     is_fail = True
 
-ball = Ball()
+def is_win():
+    if len(brick_list) == 0:
+        return True
+
+num_of_ball = 2
+
+ball = [Ball()]
+ball.append(Ball())
 board = Board()
 
 make_brick()
 
 coutner = 0
+time_start = 0
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -133,7 +163,7 @@ while running:
     time.sleep(1/FPS)
 
     coutner += 1
-    if coutner <= 3*FPS:
+    if coutner <= (time_start)*FPS:
         sec = coutner//FPS
 
         screen.fill((0, 0, 0), (0, 0, 800, 600))
@@ -143,14 +173,20 @@ while running:
         pygame.display.flip()
         continue
 
-    
-
     if not is_fail:
-        ball.move(brick_list,board)
+        for ba in ball:
+            ba.move(brick_list,board)
         board.input(event)
 
+        if is_win():
+            font = pygame.font.SysFont(None, 50)
+            text = font.render("You Win!", True, (255, 255, 255))
+            screen.blit(text, (400, 250))
+            break
+
         screen.fill((0, 0, 0), (0, 0, 800, 600))
-        ball.draw(screen)
+        for ba in ball:
+            ba.draw(screen)
 
         for b in brick_list:
             b.draw(screen)
