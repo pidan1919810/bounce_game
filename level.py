@@ -1,43 +1,39 @@
 import pygame
-from level_objects.ball import Ball
-from level_objects.board import Board
+from setting import SCREEN_HEIGHT, SCREEN_WIDTH
+from level_objects.ball import ball_manager
+from level_objects.board import board
+from level_objects.brick import brick_manager
 
 running:bool = True
 objects:list = []
 
-board = Board()
+def init() -> None:
+    objects.append(brick_manager)
+    
+    objects.append(ball_manager)
+    ball_manager.extend(1)
+    
+    objects.append(board)
 
-def init():
-    pass
-
-def is_failed():
+def is_running() -> bool:
     return running
 
-def in_game():
-    
+def in_game() -> None:
+    pass
 
-def update_level(screen):
-    for event in pygame.event.get():
+def update_level(screen) -> None:
+    global running
+    events = pygame.event.get()
+    for event in events:
         if event.type == pygame.QUIT:
-            global running
             running = False
 
     for object in objects:
-        object.update(event)
+        object.update(events)
 
-    if is_win():
-        font = pygame.font.SysFont(None, 50)
-        text = font.render("You Win!", True, (255, 255, 255))
-        screen.blit(text, (400, 250))
-        break
+    screen.fill((0, 0, 0))
 
-    screen.fill((0, 0, 0), (0, 0, SCREEN_WIDTH, SCREEN_HIGHT))
-    for ba in ball:
-        ba.draw(screen)
-
-    for b in brick_list:
-        b.draw(screen)
-
-    board.draw(screen)
+    for object in objects:
+        object.draw(screen)
 
     pygame.display.flip()
