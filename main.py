@@ -85,7 +85,6 @@ class Board():
         return self.x, self.y, self.length
 
     def input(self, event):
-        print(event)
         if event.type == pygame.KEYDOWN:
 
             if event.key == pygame.K_LEFT:
@@ -100,7 +99,6 @@ class Board():
                 self.x += 10
 
             if event.text == ' ':
-                print('a')
                 global ball,num_of_ball
                 num_of_ball += 1
                 ball.append(Ball())
@@ -113,13 +111,13 @@ class Board():
     def draw(self, screen):
         pygame.draw.rect(screen, self.color, (self.x, self.y, self.length, 10))
 
-brick_size = 20
+BRICK_SIZE = 20
 
 class Brick():
     def __init__(self,x,y):
         self.x = x
         self.y = y
-        self.size = brick_size
+        self.size = BRICK_SIZE
     
     def draw(self, screen):
         pygame.draw.rect(screen, (200, 200, 200), (self.x+1, self.y+1, self.size-1, self.size-1))
