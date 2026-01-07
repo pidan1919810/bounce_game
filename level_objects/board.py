@@ -4,7 +4,7 @@ from setting import BOARD_LENGTH, SCREEN_WIDTH, BOARD_MOVEING_SPEED
 
 class Board():
     def __init__(self) -> None:
-        self.x:float = 0
+        self.x:float = SCREEN_WIDTH/2-BOARD_LENGTH/2
         self.y:float = 600
         self.move_delta:pygame.Vector2 = Vector2(0,0)
         self.speed:float = BOARD_MOVEING_SPEED

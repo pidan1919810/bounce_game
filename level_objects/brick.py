@@ -1,7 +1,9 @@
 import pygame
+from .base_object import Base_object
+from pygame.event import Event
 from setting import BRICK_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH
 
-class Brick():
+class Brick(Base_object):
     def __init__(self, x:float, y:float) -> None:
         self.x:float = x
         self.y:float = y
@@ -11,11 +13,8 @@ class Brick():
         pygame.draw.rect(screen, (200, 200, 200), (self.x+1, self.y+1, self.size-1, self.size-1))
         pygame.draw.lines(screen, (255, 255, 255), True, [(self.x, self.y), (self.x+self.size, self.y), (self.x+self.size, self.y+self.size), (self.x, self.y+self.size)], 1)
 
-    def get_x(self) -> float:
-        return self.x
-    
-    def get_y(self) -> float:
-        return self.y
+    def update(self, events:list[Event]) -> None:
+        pass
     
     def get_size(self) -> float:
         return self.size
