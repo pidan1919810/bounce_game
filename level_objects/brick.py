@@ -20,7 +20,7 @@ class Brick(Base_object):
         return self.size
     
 
-class Brick_manager:
+class Brick_manager(Base_object):
     bricks:list[Brick]
     
     def __init__(self) -> None:
@@ -51,6 +51,12 @@ class Brick_manager:
     def draw(self, screen:pygame.Surface) -> None:
         for brick in self.bricks:
             brick.draw(screen)
+            
+    def clear(self) -> None:
+        self.bricks = []
+        self.make_brick()
+    def get_brick_cout(self) -> int:
+        return len(self.bricks)
 
 
 brick_manager = Brick_manager()

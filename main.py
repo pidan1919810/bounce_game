@@ -11,8 +11,8 @@ level.init()
 
 clock = pygame.time.Clock()
 while level.is_running():
-    clock.tick(FPS)
-    running = level.is_running()
     level.update_level(screen)
+    
+    clock.tick(FPS)
 
 pygame.quit()
