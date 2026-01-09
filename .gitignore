@@ -1,2 +1,9 @@
 __pycache__/
-level_objects/__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+dist/
+build/
+.eggs/

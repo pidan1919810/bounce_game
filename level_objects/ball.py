@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from typing import override
 
 from .base_object import Base_object
-from setting import BALL_SPEED, SCREEN_HEIGHT, SCREEN_WIDTH
+from setting import *
 
 class Base_balls(Base_object, ABC):
     """
@@ -22,15 +22,20 @@ class Base_balls(Base_object, ABC):
         super().__init__(x, y)
         self.direction = Vector2(0,0)
         
+    def set_direction(self, dir:Vector2) -> None:
+        self.direction = dir
+        
     def random_direction(self) -> None:
-        self.direction = pygame.Vector2(random.random(),-random.random())
-        if random.randint(0,1) == 0:
-            self.direction.x = -1
-        self.direction.normalize()
+        import math
+        random_angle = random.randint(30,150)
+        angle_rad = math.radians(random_angle)
+        self.direction = pygame.Vector2(
+            math.cos(angle_rad),
+            -math.sin(angle_rad)
+        )
         
     def move(self) -> None:
         self.direction.normalize_ip()
-        print(self.direction)
         speed = self.speed
         self.x += self.direction.x * speed
         self.y += self.direction.y * speed
@@ -82,8 +87,6 @@ class Base_balls(Base_object, ABC):
                 
                 break  # 一次只处理一个砖块
             
-
-
     @abstractmethod
     def out_screen(self) -> None:
         pass
@@ -91,6 +94,7 @@ class Base_balls(Base_object, ABC):
     @abstractmethod
     def touch_object(self, object:Base_object|None) -> None:
         pass
+
 
 class Normal_ball(Base_balls):
     def __init__(self, x:float, y:float) -> None:
@@ -100,9 +104,7 @@ class Normal_ball(Base_balls):
         self.color = pygame.Color(255, 255, 255)
         self.speed = BALL_SPEED
         
-        self.direction = pygame.Vector2(random.randint(0,1),-1)
-        if self.direction.x == 0:
-            self.direction.x = -1
+        self.random_direction()
         
     def update(self, events:list[pygame.event.Event]) -> None:
         if ball_manager.start:
@@ -121,13 +123,18 @@ class Normal_ball(Base_balls):
             brick_manager.break_brick(object)
             from level import add_score
             add_score(10)
+            #随机生成分裂球
+            if random.random() <= EFFECT_BALL_GENRATE_PERCENTAGE:
+                from .board import board
+                ball_manager.extend(Effect_ball, board.get_pos() + Vector2(0,-40))
+
 
 class Effect_ball(Base_balls):
     def __init__(self, x:float, y:float) -> None:
         super().__init__(x,y)
         #self.effect:str = effect
         self.raduis = 10
-        self.speed = 5
+        self.speed = 8
         self.random_direction()
         
         self.color = pygame.Color(255,0,0)
@@ -140,10 +147,13 @@ class Effect_ball(Base_balls):
         pygame.draw.circle(screen, self.color, (self.x, self.y), self.raduis)
     
     def touch_object(self, object: Base_object | None) -> None:
-        ball_manager.extend(Normal_ball,(self.x-20,self.y),(self.x,self.y),(self.x+20,self.y))
+        self.effect()
         ball_manager.delete_ball(self)
         from level import add_score
         add_score(10)
+        
+    def effect(self) -> None:
+        ball_manager.extend(Normal_ball,(self.x-20,self.y),(self.x,self.y),(self.x+20,self.y))
     
     def out_screen(self) -> None:
         return super().out_screen()
@@ -154,6 +164,9 @@ class Ball_manager(Base_object):
     ball_count:int
     
     def __init__(self) -> None:
+        self.init()
+    
+    def init(self) -> None:
         self.ball_count = 0
         self.balls = []
         self.start = False
@@ -161,21 +174,35 @@ class Ball_manager(Base_object):
     def extend( 
             self, 
             cls:type[Base_balls], 
-            *args:tuple[float, float]
-            ) -> None:
+            *args:tuple[float, float] | Vector2
+        ) -> bool:
         
-        for pos in args:
-            self.ball_count += 1
-            self.balls.append(cls.create(pos[0], pos[1]))
+        if self.get_cout() <= BALL_NUMBER_LIMIT:
+            for pos in args:
+                self.ball_count += 1
+                self.balls.append(cls.create(pos[0], pos[1]))
+            return True
+        else:
+            return False
     
     def update(self, events) -> None:
         for event in events:
             if event.type == pygame.KEYDOWN:
+                if cheat.SPAWN_ELEMENT:
+                    if event.key == pygame.K_n:
+                        self.extend(Normal_ball,(300,500))
+                    if event.key == pygame.K_m:
+                        self.extend(Effect_ball,(300,500))
+
+        #发射方向计算
+        if cheat.BALL_FOLLOW_MOUSE or not self.start:
+            if pygame.mouse.get_pressed()[0]:
+                for ball in self.balls:
+                    ball_pos = ball.get_pos()
+                    mouse_pos = Vector2(pygame.mouse.get_pos())
+                    direction = mouse_pos - ball_pos
+                    ball.set_direction(direction.normalize())
                 self.start = True
-                if event.key == pygame.K_n:
-                    self.extend(Normal_ball,(300,500))
-                if event.key == pygame.K_m:
-                    self.extend(Effect_ball,(300,500))
         
         for ball in self.balls:
             ball.update(events)
@@ -183,6 +210,15 @@ class Ball_manager(Base_object):
     def draw(self, screen:pygame.Surface) -> None:
         for ball in self.balls:
             ball.draw(screen)
+            
+            #绘制发射方向指示
+            if not self.start:
+                ball_pos = ball.get_pos()
+                mouse_pos = Vector2(pygame.mouse.get_pos())
+                direction = mouse_pos - ball_pos
+                instruction_pos = ball_pos + direction.normalize()*INSTRUCTION_LINE_LENGTH
+                pygame.draw.line(screen, (128,128,128), ball_pos, instruction_pos, 5)
+            
             
     def delete_ball(self, ball:Base_balls) -> None:
         self.ball_count -= 1

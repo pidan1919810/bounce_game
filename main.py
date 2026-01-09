@@ -3,9 +3,9 @@ from setting import SCREEN_WIDTH, SCREEN_HEIGHT, FPS
 import level
 
 pygame.init()
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+screen: pygame.Surface = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
-pygame.display.set_caption("bounce_game")
+pygame.display.set_caption("Brick Breaker")
 
 level.init()
 

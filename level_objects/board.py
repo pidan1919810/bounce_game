@@ -1,21 +1,18 @@
 import pygame
+from .base_object import Base_object
 from pygame import Vector2
-from setting import BOARD_LENGTH, SCREEN_WIDTH, BOARD_MOVEING_SPEED
+from setting import BOARD_LENGTH, SCREEN_WIDTH, BOARD_MOVEING_SPEED, BOARD_Y
 
-class Board():
+class Board(Base_object):
     def __init__(self) -> None:
         self.x:float = SCREEN_WIDTH/2-BOARD_LENGTH/2
-        self.y:float = 600
+        self.y:float = BOARD_Y
         self.move_delta:pygame.Vector2 = Vector2(0,0)
         self.speed:float = BOARD_MOVEING_SPEED
         self.length = BOARD_LENGTH
 
         self.color = (255,100,100)
 
-    def get_x(self) -> float:
-        return self.x
-    def get_y(self) -> float:
-        return self.y
     def get_length(self) -> float:
         return self.length
 

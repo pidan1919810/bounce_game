@@ -30,6 +30,8 @@ class Base_object(ABC):
         return self.x
     def get_y(self) -> float:
         return self.y
+    def get_pos(self) -> pygame.Vector2:
+        return pygame.Vector2(self.x, self.y)
     
 class Base_image(Base_object, ABC):
     """

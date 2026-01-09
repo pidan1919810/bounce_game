@@ -1,0 +1,4 @@
+#作弊
+BALL_FOLLOW_MOUSE = True
+
+SPAWN_ELEMENT = True
