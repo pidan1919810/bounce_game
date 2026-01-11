@@ -16,7 +16,7 @@ def resource_path(relative_path):
         base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
 
-TEXT_FONT: str = resource_path("font\\ZiTiGuanJiaFangSongTi-2.ttf")
+TEXT_FONT: str = resource_path("font/ZiTiGuanJiaFangSongTi-2.ttf")
 
 #失败界面
 FAILED_TEXT_SIZE = 30
